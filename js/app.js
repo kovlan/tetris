@@ -228,7 +228,7 @@ Tetelem.prototype.floor = function() {
 
 //====================================
 // Factory for tetris elements
-var base_speed = 2;
+var base_speed = 5;
 var dspeed = 0.05;
 var createTetelem = function(width, height) {
     id = Math.floor((Math.random() * 7) + 1);
@@ -290,24 +290,3 @@ var createTetelem = function(width, height) {
     base_speed += dspeed;
     return result;
 }
-
-
-//============================================
-// control
-
-var Actions = function() {
-    this.seq = [];
-}
-
-Actions.prototype.add = function(a) {
-    this.seq.push(a);
-}
-
-Actions.prototype.get = function() {
-    return this.seq;
-}
-
-Actions.prototype.clear = function() {
-    this.seq = [];
-}
-

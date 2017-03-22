@@ -20,7 +20,8 @@ var Engine = (function(global) {
     var isElemInField = false;
     var elem = {};
     var count = 1000;
-    ctx.actions = new Actions();
+    var actions = [];
+    var paused = false;
 
     canvas.width = canvas_width;
     canvas.height = canvas_height;
@@ -31,27 +32,26 @@ var Engine = (function(global) {
      */
     function main() {
 
-        if (!isElemInField) {
-            elem = createTetelem(field_width, field_height);
-            if (!field.isValidElem(elem)) {
-                return;
-                field = new Field(field_width, field_height);
+        var now = Date.now();
+        if (!paused) {
+            if (!isElemInField) {
+                elem = createTetelem(field_width, field_height);
+                if (!field.isValidElem(elem)) {
+                    field.freezeElem(elem);
+                    return;
+                }
+                isElemInField = true;
             }
-            isElemInField = true;
+            
+            var dt = (now - lastTime) / 1000.0;
+
+            update(dt);
+            render();
         }
-
-        var now = Date.now(),
-            dt = (now - lastTime) / 1000.0;
-
-        update(dt);
-        render();
 
         lastTime = now;
 
-        //count--;
-        //if (count > 0) {
-            win.requestAnimationFrame(main);
-        //}
+        win.requestAnimationFrame(main);
     }
 
     function init() {
@@ -61,8 +61,7 @@ var Engine = (function(global) {
     }
 
     function act() {
-        acts = ctx.actions.get();
-        for (a in acts) {
+        for (a in actions) {
             var backup_pts = [];
             var pts = elem.getPts();
             for (i in pts) {
@@ -70,7 +69,7 @@ var Engine = (function(global) {
             }
             var full_break = false;
 
-            switch (acts[a]) {
+            switch (actions[a]) {
             case 'left':
                 elem.moveLeft();
                 break;
@@ -99,7 +98,7 @@ var Engine = (function(global) {
                 elem.setPts(backup_pts);
             }
         }
-        ctx.actions.clear();
+        actions = [];
     }
 
     function update(dt) {
@@ -142,16 +141,7 @@ var Engine = (function(global) {
     function reset() {
     }
 
-    Resources.load(image_set.getAllPaths());
-    Resources.onReady(init);
-
-    /* Assign the canvas' context object to the global variable (the window
-     * object when run in a browser) so that developers can use it more easily
-     * from within their app.js files.
-     */
-    global.ctx = ctx;
-
-    document.addEventListener('keyup', function(e) {
+    document.addEventListener('keydown', function(e) {
         var allowedKeys = {
             37: 'left',
             38: 'up',
@@ -160,9 +150,16 @@ var Engine = (function(global) {
             32: 'space'
         };
 
+        if (e.keyCode == 80 || e.keyCode == 112) {
+            paused = !paused;
+        }
+
         if (allowedKeys[e.keyCode]) {
-            ctx.actions.add(allowedKeys[e.keyCode]);
+            actions.push(allowedKeys[e.keyCode]);
         }
     });
+
+    Resources.load(image_set.getAllPaths());
+    Resources.onReady(init);
 
 })(this);
