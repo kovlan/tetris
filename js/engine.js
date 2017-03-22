@@ -15,13 +15,13 @@ var Engine = (function(global) {
     var elem_height = 20;
     var field_width = 15;
     var field_height = 25;
-    var field = new Field(field_width, field_height);
+    var field = {};
     var image_set = new ImageSet();
     var isElemInField = false;
     var elem = {};
-    var count = 1000;
     var actions = [];
     var paused = false;
+    var playing = true;
 
     canvas.width = canvas_width;
     canvas.height = canvas_height;
@@ -38,7 +38,7 @@ var Engine = (function(global) {
                 elem = createTetelem(field_width, field_height);
                 if (!field.isValidElem(elem)) {
                     field.freezeElem(elem);
-                    return;
+                    playing = false;
                 }
                 isElemInField = true;
             }
@@ -51,7 +51,9 @@ var Engine = (function(global) {
 
         lastTime = now;
 
-        win.requestAnimationFrame(main);
+        if (playing) {
+            win.requestAnimationFrame(main);
+        }
     }
 
     function init() {
@@ -139,6 +141,12 @@ var Engine = (function(global) {
     }
 
     function reset() {
+        field = new Field(field_width, field_height);
+        isElemInField = false;
+        elem = {};
+        actions = [];
+        paused = false;
+        playing = true;
     }
 
     document.addEventListener('keydown', function(e) {
@@ -150,10 +158,17 @@ var Engine = (function(global) {
             32: 'space'
         };
 
+        // pause/resume on P/p
         if (e.keyCode == 80 || e.keyCode == 112) {
             paused = !paused;
         }
 
+        // start new game
+        if (e.keyCode == 13 && !playing) {
+            win.requestAnimationFrame(init);
+        }
+
+        // move
         if (allowedKeys[e.keyCode]) {
             actions.push(allowedKeys[e.keyCode]);
         }
