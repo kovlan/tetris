@@ -8,7 +8,7 @@ var Engine = (function(global) {
         lastTime;
 
     var canvas_width = 320;
-    var canvas_height = 520;
+    var canvas_height = 550;
     var offset_x = 10;
     var offset_y = 10;
     var elem_width = 20;
@@ -18,7 +18,7 @@ var Engine = (function(global) {
     var field = {};
     var image_set = new ImageSet();
     var isElemInField = false;
-    var elem = {};
+    var elem = {}, next_elem = {};
     var actions = [];
     var paused = false;
     var playing = true;
@@ -35,7 +35,8 @@ var Engine = (function(global) {
         var now = Date.now();
         if (!paused) {
             if (!isElemInField) {
-                elem = createTetelem(field_width, field_height);
+                elem = next_elem;
+                next_elem = createTetelem(field_width, field_height);
                 if (!field.isValidElem(elem)) {
                     field.freezeElem(elem);
                     playing = false;
@@ -116,7 +117,11 @@ var Engine = (function(global) {
     }
 
     function render() {
-        ctx.drawImage(Resources.get(image_set.getBkgPath()), 0, 0);
+        //ctx.drawImage(Resources.get(image_set.getBkgPath()), 0, 0);
+        ctx.fillStyle='#CCCCCC';
+        ctx.fillRect(0, 0, canvas_width, canvas_height);
+        ctx.fillStyle='black';
+
         for (row = 0; row < field_height; row++) {
             for (col = 0; col < field_width; col++) {
                 var ind = field.getValue(col, row);
@@ -157,6 +162,23 @@ var Engine = (function(global) {
                           offset_x + elem_pts[i].x * elem_width,
                           offset_y + elem_pts[i].y * elem_height);
         }
+
+        elem_img = Resources.get(image_set.getPathByIndex(next_elem.getID()));
+        elem_pts = next_elem.getPts();
+        var min_x = elem_pts[0].x, min_y = elem_pts[0].y;
+        for (var i = 1; i < elem_pts.length; ++i) {
+            if (min_x > elem_pts[i].x) {
+                min_x = elem_pts[i].x;
+            }
+            if (min_y > elem_pts[i].y) {
+                min_y = elem_pts[i].y;
+            }
+        }
+        for (var i in elem_pts) {
+            ctx.drawImage(elem_img,
+                          Math.round(canvas_width * 0.7) + (elem_pts[i].x - min_x) * elem_width,
+                          bottom_line_y + 36 + (elem_pts[i].y - min_y) * elem_height);
+        }
     }
 
     function reset() {
@@ -167,6 +189,7 @@ var Engine = (function(global) {
         actions = [];
         paused = false;
         playing = true;
+        next_elem = createTetelem(field_width, field_height);
     }
 
     document.addEventListener('keydown', function(e) {
