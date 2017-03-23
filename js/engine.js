@@ -159,6 +159,7 @@ var Engine = (function(global) {
     }
 
     function reset() {
+        initCreateTelem();
         field = new Field(field_width, field_height);
         isElemInField = false;
         elem = {};

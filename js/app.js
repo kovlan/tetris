@@ -242,8 +242,12 @@ Tetelem.prototype.floor = function() {
 
 //====================================
 // Factory for tetris elements
-var base_speed = 3;
-var dspeed = 0.05;
+var base_speed;
+var dspeed;
+var initCreateTelem = function() {
+    base_speed = 3;
+    dspeed = 0.05;
+}
 var createTetelem = function(width, height) {
     id = Math.floor((Math.random() * 7) + 1);
     x = Math.floor((Math.random() * (width - 6)) + 3);
