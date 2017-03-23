@@ -88,7 +88,7 @@ var Engine = (function(global) {
                 while (field.isValidElem(elem)) {
                     elem.moveDown();
                 }
-                elem.floor();
+                elem.moveUp();
                 full_break = true;
                 break;
             }
@@ -108,6 +108,7 @@ var Engine = (function(global) {
         
         elem.update(dt);
         if (!field.isValidElem(elem)) {
+            elem.moveUp();
             field.freezeElem(elem);
             isElemInField = false;
             field.checkAndDelete();

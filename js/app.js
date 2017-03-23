@@ -64,17 +64,12 @@ Field.prototype.getValue = function(x, y) {
 Field.prototype.isValidElem = function(elem) {
     var pts = elem.getPts();
     for (var i in pts) {
-        var x = Math.floor(pts[i].x);
-        if (x < 0 || x >= this.cols || pts[i].y >= this.rows - 1) {
+        var x = pts[i].x;
+        if (x < 0 || x >= this.cols || pts[i].y >= this.rows) {
             return false;
         }
 
-        var y = Math.floor(pts[i].y);
-        if (y >= 0 && this.elems[y][x] > 0) {
-            return false;
-        }
-
-        y = Math.ceil(pts[i].y);
+        var y = pts[i].y;
         if (y >= 0 && this.elems[y][x] > 0) {
             return false;
         }
@@ -85,8 +80,8 @@ Field.prototype.isValidElem = function(elem) {
 Field.prototype.freezeElem = function(elem) {
     var pts = elem.getPts();
     for (var i in pts) {
-        var x = Math.floor(pts[i].x);
-        var y = Math.floor(pts[i].y);
+        var x = pts[i].x;
+        var y = pts[i].y;
         if (x >= 0 && x < this.cols &&
             y >= 0 && y < this.rows) {
             this.elems[y][x] = elem.getID();
@@ -107,6 +102,7 @@ Field.prototype.checkAndDelete = function() {
             --y;
             continue;
         }
+        increaseSpeed();
         this.score++;
         for (var y2 = y; y2 >= 1; --y2) {
             for (var x2 = 0; x2 < this.cols; ++x2) {
@@ -134,6 +130,7 @@ var Tetelem = function(points, speed, id) {
     }
     this.center.x = Math.round(this.center.x / this.pts.length);
     this.center.y = Math.round(this.center.y / this.pts.length);
+    this.pos = 0.0;
     this.computeCenter();
 }
 
@@ -148,10 +145,11 @@ Tetelem.prototype.computeCenter = function() {
 }
 
 Tetelem.prototype.update = function(dt) {
-    for (var i in this.pts) {
-        this.pts[i].y += this.speed * dt;
+    this.pos += this.speed * dt;
+    if (this.pos >= 1) {
+        this.moveDown();
+        this.pos -= 1;
     }
-    this.center.y += this.speed * dt;
 }
 
 Tetelem.prototype.getID = function() {
@@ -225,28 +223,16 @@ Tetelem.prototype.moveUp = function() {
     this.center.y--;
 }
 
-Tetelem.prototype.round = function() {
-    for (i in this.pts) {
-        this.pts[i].y = Math.round(this.pts[i].y);
-    }
-    this.center.y = Math.round(this.center.y);
-}
-
-Tetelem.prototype.floor = function() {
-    for (i in this.pts) {
-        this.pts[i].y = Math.floor(this.pts[i].y);
-    }
-    this.center.y = Math.floor(this.center.y);
-}
-
 
 //====================================
 // Factory for tetris elements
-var base_speed;
-var dspeed;
+var base_speed, dspeed;
 var initCreateTelem = function() {
     base_speed = 3;
-    dspeed = 0.05;
+    dspeed = 0.1;
+}
+var increaseSpeed = function() {
+    base_speed += dspeed;
 }
 var createTetelem = function(width, height) {
     id = Math.floor((Math.random() * 7) + 1);
@@ -305,6 +291,5 @@ var createTetelem = function(width, height) {
     for (var i = 0; i < rots; ++i) {
         result.rotateCW();
     }
-    base_speed += dspeed;
     return result;
 }
