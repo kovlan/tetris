@@ -14,7 +14,7 @@ var Engine = (function(global) {
     var elem_width = 20;
     var elem_height = 20;
     var field_width = 15;
-    var field_height = 25;
+    var field_height = 21;
     var field = {};
     var image_set = new ImageSet();
     var isElemInField = false;
@@ -126,6 +126,24 @@ var Engine = (function(global) {
                 }
             }
         }
+
+        var bottom_line_y = offset_y + field_height * elem_height;
+        var right_line_x = offset_x + field_width * elem_width;
+        ctx.beginPath();
+        ctx.moveTo(offset_x, 1);
+        ctx.lineTo(offset_x, bottom_line_y);
+        ctx.lineTo(offset_x + field_width * elem_width, bottom_line_y);
+        ctx.lineTo(right_line_x, 1);
+        ctx.stroke();
+
+        ctx.font = '24px serif';
+        ctx.fillText('Score: ' + field.getScore().toString(), 
+                     offset_x,
+                     bottom_line_y + 36);
+
+        ctx.fillText('Elements: ' + field.getElemScore().toString(), 
+                     offset_x,
+                     bottom_line_y + 72);
 
         if (!isElemInField) {
             return;

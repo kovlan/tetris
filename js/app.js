@@ -44,6 +44,17 @@ var Field = function(cols, rows) {
             this.elems[i][j] = 0;
         }
     }
+
+    this.score = 0;
+    this.elem_score = 0;
+}
+
+Field.prototype.getScore = function() {
+    return this.score;
+}
+
+Field.prototype.getElemScore = function() {
+    return this.elem_score;
 }
 
 Field.prototype.getValue = function(x, y) {
@@ -81,10 +92,11 @@ Field.prototype.freezeElem = function(elem) {
             this.elems[y][x] = elem.getID();
         }
     }
+    this.elem_score++;
 }
 
 Field.prototype.checkAndDelete = function() {
-    for (var y = this.rows-1; y >= 0; --y) {
+    for (var y = this.rows-1; y >= 0; ) {
         var all = true;
         for (var x = 0; x < this.cols; ++x) {
             if (this.elems[y][x] == 0) {
@@ -92,8 +104,10 @@ Field.prototype.checkAndDelete = function() {
             }
         }
         if (!all) {
+            --y;
             continue;
         }
+        this.score++;
         for (var y2 = y; y2 >= 1; --y2) {
             for (var x2 = 0; x2 < this.cols; ++x2) {
                 this.elems[y2][x2] = this.elems[y2-1][x2];
@@ -228,7 +242,7 @@ Tetelem.prototype.floor = function() {
 
 //====================================
 // Factory for tetris elements
-var base_speed = 5;
+var base_speed = 3;
 var dspeed = 0.05;
 var createTetelem = function(width, height) {
     id = Math.floor((Math.random() * 7) + 1);
